@@ -1,3 +1,158 @@
+Player: Carlos
+Vitórias: 0
+
 Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: Icaro
+Vitórias: 0
+
+Player: 
+Jogadas: 0
+Vitórias: 0
+
+Player: 
+Jogadas: 0
+Vitórias: 0
+
+Player: 
+Jogadas: 0
+Vitórias: 0
+
+Player: 
+Jogadas: 0
+Vitórias: 0
+
+Player: 
+Jogadas: 1
+Vitórias: 0
+
+Player: 
+Jogadas: 2
+Vitórias: 0
+
+Player: 
+Jogadas: 3
+Vitórias: 0
+
+Player: 
+Jogadas: 4
+Vitórias: 0
+
+Player: 
+Jogadas: 5
+Vitórias: 0
+
+Player: 
+Jogadas: 6
+Vitórias: 0
+
+Player: 
+Jogadas: 7
+Vitórias: 0
+
+Player: 
+Jogadas: 8
+Vitórias: 0
+
+Player: 
+Jogadas: 9
+Vitórias: 0
+
+Player: 
+Jogadas: 10
+Vitórias: 0
+
+Player: 
+Jogadas: 11
+Vitórias: 0
+
+Player: 
+Jogadas: 12
+Vitórias: 0
+
+Player: 
+Jogadas: 13
+Vitórias: 0
+
+Player: 
+Jogadas: 14
+Vitórias: 0
+
+Player: 
+Jogadas: 15
+Vitórias: 0
+
+Player: 
+Jogadas: 16
+Vitórias: 0
+
+Player: 
+Jogadas: 17
+Vitórias: 0
+
+Player: 
+Jogadas: 18
+Vitórias: 0
+
+Player: 
+Jogadas: 19
+Vitórias: 0
+
+Player: 
+Jogadas: 20
+Vitórias: 0
+
+Player: 
+Jogadas: 20
+Vitórias: 0
+
+Player: 
+Jogadas: 0
 Vitórias: 0
 
