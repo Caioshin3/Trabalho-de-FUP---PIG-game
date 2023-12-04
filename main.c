@@ -31,10 +31,11 @@ void Login(Player *, int *, int *, int *);
 void Lancar_Dado(Player *, PC *, int *, int, int *);
 void Lancar_Dado_PC(PC *, Player *);
 void Segurar_Dado(Player *);
-void Lancar_Dois_Dados(Player *, PC *, int *);
+void Lancar_Dois_Dados(Player *, PC *, int *, int *);
 void Lancar_Dois_Dado_PC(PC *, Player *);
 void Criar_Ranking(Player *, int *, int *, int *);
-int Jogador_Existente_Ranking(Player *, int *, int *);
+void Atualizar_Ranking(Player *, int *, int *);
+int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores);
 void Mostrar_Ranking();
 void Zerar_Dados(Player *, PC *);
 void Dificuldade(int *);
@@ -47,7 +48,6 @@ int main()
 
     int opcao, dificuldade = 1, continuar_jogo = 1, vitoria = 0, Dev = 0, cont_jogadas = 0, num_jogadores = 0;
     Player player;
-    Player players[MAX_PLAYERS];
     PC computador;
 
     player.Resultado_Player = 0;
@@ -57,15 +57,10 @@ int main()
 
     srand(time(NULL));
 
-    Menu_Login(opcao, players, &num_jogadores, &vitoria, &cont_jogadas);
+    Menu_Login(opcao, &player, &num_jogadores, &vitoria, &cont_jogadas);
 
     while (continuar_jogo)
     {
-        if (num_jogadores > 0)
-        {
-            Criar_Ranking(players, &vitoria, &cont_jogadas, &num_jogadores);
-        }
-
         int Soma_Resultado_Def = player.Resultado_Player + player.Resultado_Def_Player;
 
         if (player.Dado_Player != 1)
@@ -97,7 +92,7 @@ int main()
             }
             if (dificuldade == 2)
             {
-                Lancar_Dois_Dados(&player, &computador, &cont_jogadas);
+                Lancar_Dois_Dados(&player, &computador, &cont_jogadas, &vitoria);
             }
             break;
         case 2:
@@ -159,46 +154,60 @@ void Menu_Login(int opcao, Player *players, int *num_jogadores, int *victory, in
 
 void Cadastro(Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
 {
-    do
-    {
+    int cont = 0;
+    char linha[100];
+    
+    FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "a+");
+    
+     while (fgets(linha, sizeof(linha), arquivo_ranking)!=NULL){
+        cont++;    
+     }
+     
+     if(cont<=MAX_PLAYERS){
         printf("Informe o nome do jogador: ");
-        scanf("%s", players[*num_jogadores].nome);
+        scanf("%s", players->nome);
         system("cls");
         printf("Novo jogador cadastrado!\n");
-        (*num_jogadores)++;
-    } while (strlen(players[*num_jogadores - 1].nome) == 0);
+        
+        fprintf(arquivo_ranking, "%s,", players->nome);
+        fprintf(arquivo_ranking, "%d,", *cont_jogadas);
+        fprintf(arquivo_ranking, "%d,\n", *victory);
+        
+        fclose(arquivo_ranking);
+    }
+    else{
+     printf("Numero maximo de Jogadores atingido\n\n");
+     fclose(arquivo_ranking);
+     exit(0);
+    }
 }
 
 void Login(Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
 {
-    FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "r");
+    FILE *arquivo_ranking = fopen("arquivo_ranking.txt", "r");
 
     char nome[50];
+    char linha[100];
     int jogador_existente = 0;
+    int verificar = 0;
 
-    do
-    {
         printf("Informe o nome do jogador: ");
-        scanf("%s", players[*num_jogadores].nome);
+        scanf("%s", players->nome);
         system("cls");
-    } while (strlen(players[*num_jogadores].nome) == 0);
-
-    if (arquivo_ranking != NULL)
-    {
-        while (fscanf(arquivo_ranking, "Player: %s\n", nome) != EOF)
+        while (fgets(linha, sizeof(linha), arquivo_ranking)!=NULL)
         {
-            if (strcmp(nome, players[*num_jogadores].nome) == 0)
+           sscanf(linha, "%[^,],%d,%d",nome,&*cont_jogadas,&*victory);
+            if (strcmp(nome, players->nome) == 0)
             {
+                verificar = 1;
                 fclose(arquivo_ranking);
             }
         }
-
-        Cadastro(players, num_jogadores, victory, cont_jogadas);
-        fclose(arquivo_ranking);
-    }
-    else
+    if(verificar == 0)
     {
-        printf("ERRO AO FAZER UM LOGIN COM ARQUIVO!\n");
+        printf("Usuario não encontrado!\n");
+        fclose(arquivo_ranking);
+        
     }
 }
 
@@ -232,6 +241,7 @@ void Lancar_Dado(Player *player, PC *computador, int *victory, int dev, int *jog
 
         printf("Você tirou %d\n", player->Dado_Player);
         (*jogadas)++;
+        Atualizar_Ranking(player, jogadas, victory);
 
         if (player->Resultado_Player > 0)
         {
@@ -302,7 +312,7 @@ void Lancar_Dado_PC(PC *computador, Player *player)
     }
 }
 
-void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas)
+void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas, int *victory)
 {
 
     player->Dado_Player = 1 + (rand() % 6);
@@ -321,6 +331,7 @@ void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas)
 
         printf("Você tirou %d e %d\n", player->Dado_Player, player->Dado_Player_2);
         (*cont_jogadas)++;
+        Atualizar_Ranking(player, cont_jogadas, victory);
 
         if (player->Resultado_Player > 0)
         {
@@ -331,6 +342,7 @@ void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas)
         {
             system("cls");
             printf("Player ganhou!\n");
+            (*victory)++;
             Zerar_Dados(player, computador);
         }
         else
@@ -391,24 +403,11 @@ void Criar_Ranking(Player *players, int *victory, int *cont_jogadas, int *num_jo
 {
     FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "a");
 
-    // int jogador_existente = Jogador_Existente_Ranking(resultado, victory, cont_user);
-
     if (arquivo_ranking != NULL)
     {
-        // if (jogador_existente == 0)
-        // {
-        //     fprintf(arquivo_ranking, "Player: %s\n", resultado->nome);
-        //     fprintf(arquivo_ranking, "Vitórias: %d\n\n", *victory);
-        // }
-        // else
-        // {
-        //     printf("Jogador já existente!\n");
-        //     Login(resultado, cont_user);
-        // }
-
-        fprintf(arquivo_ranking, "Player: %s\n", players[*num_jogadores].nome);
-        fprintf(arquivo_ranking, "Jogadas: %d\n", *cont_jogadas);
-        fprintf(arquivo_ranking, "Vitórias: %d\n\n", *victory);
+        fprintf(arquivo_ranking, "%s,", players->nome);
+        fprintf(arquivo_ranking, "%d,", *cont_jogadas);
+        fprintf(arquivo_ranking, "%d\n", *victory);
     }
     else
     {
@@ -416,6 +415,36 @@ void Criar_Ranking(Player *players, int *victory, int *cont_jogadas, int *num_jo
     }
 
     fclose(arquivo_ranking);
+}
+
+void Atualizar_Ranking(Player *player, int *cont_jogadas, int *victory)
+{
+    FILE *arquivo_ranking_temp = fopen("./arquivo_ranking_temp.txt", "w+");
+    FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "r");
+    
+    char nome[50];
+    int jogadas, vitorias;
+    char linha[100];
+    
+    while(fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+    {
+       sscanf(linha, "%[^,],%d,%d", nome, &jogadas, &vitorias);
+      
+      if(strcmp(nome, player->nome) == 0)
+      {
+        fprintf(arquivo_ranking_temp, "%s,%d,%d\n", player->nome, *cont_jogadas, *victory);
+      }
+      else
+      {
+        fprintf(arquivo_ranking_temp, "%s,%d,%d\n", nome, jogadas, vitorias);
+      }
+    }
+    
+    fclose(arquivo_ranking_temp);
+    fclose(arquivo_ranking);
+    
+    remove("./arquivo_ranking.txt");
+    rename("./arquivo_ranking_temp.txt", "./arquivo_ranking.txt");
 }
 
 // erro na lógica da função
@@ -429,7 +458,7 @@ int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores)
 
     if (arquivo_ranking != NULL)
     {
-        while (fscanf(arquivo_ranking, "Player: %s\n", nome) != EOF)
+        while (fscanf(arquivo_ranking, "%[^,]\n", nome) != EOF)
         {
             if (strcmp(player->nome, nome) == 0)
             {
