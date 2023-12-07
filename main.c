@@ -25,9 +25,9 @@ typedef struct
     int Resultado_Def_PC;
 } PC;
 
-void Menu_Login(int, Player *, int *, int *, int *);
-void Cadastro(Player *, int *, int *, int *);
-void Login(Player *, int *, int *, int *);
+void Menu_Login(int, Player *, int *, int *);
+void Cadastro(Player *, int *, int *);
+void Login(Player *, int *, int *);
 void Lancar_Dado(Player *, PC *, int *, int, int *);
 void Lancar_Dado_PC(PC *, Player *);
 void Segurar_Dado(Player *);
@@ -36,7 +36,7 @@ void Lancar_Dois_Dado_PC(PC *, Player *);
 void Criar_Ranking(Player *, int *, int *, int *);
 void Atualizar_Ranking(Player *, int *, int *);
 int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores);
-void Mostrar_Ranking();
+void Mostrar_Ranking(Player *, int *, int *);
 void Zerar_Dados(Player *, PC *);
 void Dificuldade(int *);
 
@@ -57,7 +57,7 @@ int main()
 
     srand(time(NULL));
 
-    Menu_Login(opcao, &player, &num_jogadores, &vitoria, &cont_jogadas);
+    Menu_Login(opcao, &player, &vitoria, &cont_jogadas);
 
     while (continuar_jogo)
     {
@@ -110,7 +110,7 @@ int main()
             Dificuldade(&dificuldade);
             break;
         case 4:
-            Mostrar_Ranking();
+            Mostrar_Ranking(&player, &vitoria, &cont_jogadas);
             break;
         case 5:
             printf("Red Bull te dá asas!\n");
@@ -132,7 +132,7 @@ int main()
 
 // modulo.c
 
-void Menu_Login(int opcao, Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
+void Menu_Login(int opcao, Player *players, int *victory, int *cont_jogadas)
 {
     printf("1. Registrar novo jogador\n2. Login\n");
     scanf("%d", &opcao);
@@ -140,10 +140,10 @@ void Menu_Login(int opcao, Player *players, int *num_jogadores, int *victory, in
     switch (opcao)
     {
     case 1:
-        Cadastro(players, num_jogadores, victory, cont_jogadas);
+        Cadastro(players, victory, cont_jogadas);
         break;
     case 2:
-        Login(players, num_jogadores, victory, cont_jogadas);
+        Login(players, victory, cont_jogadas);
         break;
 
     default:
@@ -152,37 +152,40 @@ void Menu_Login(int opcao, Player *players, int *num_jogadores, int *victory, in
     }
 }
 
-void Cadastro(Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
+void Cadastro(Player *players, int *victory, int *cont_jogadas)
 {
     int cont = 0;
     char linha[100];
-    
+
     FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "a+");
-    
-     while (fgets(linha, sizeof(linha), arquivo_ranking)!=NULL){
-        cont++;    
-     }
-     
-     if(cont<=MAX_PLAYERS){
+
+    while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+    {
+        cont++;
+    }
+
+    if (cont <= MAX_PLAYERS)
+    {
         printf("Informe o nome do jogador: ");
         scanf("%s", players->nome);
         system("cls");
         printf("Novo jogador cadastrado!\n");
-        
+
         fprintf(arquivo_ranking, "%s,", players->nome);
         fprintf(arquivo_ranking, "%d,", *cont_jogadas);
         fprintf(arquivo_ranking, "%d,\n", *victory);
-        
+
         fclose(arquivo_ranking);
     }
-    else{
-     printf("Numero maximo de Jogadores atingido\n\n");
-     fclose(arquivo_ranking);
-     exit(0);
+    else
+    {
+        printf("Numero maximo de Jogadores atingido\n\n");
+        fclose(arquivo_ranking);
+        exit(0);
     }
 }
 
-void Login(Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
+void Login(Player *players, int *victory, int *cont_jogadas)
 {
     FILE *arquivo_ranking = fopen("arquivo_ranking.txt", "r");
 
@@ -191,23 +194,22 @@ void Login(Player *players, int *num_jogadores, int *victory, int *cont_jogadas)
     int jogador_existente = 0;
     int verificar = 0;
 
-        printf("Informe o nome do jogador: ");
-        scanf("%s", players->nome);
-        system("cls");
-        while (fgets(linha, sizeof(linha), arquivo_ranking)!=NULL)
+    printf("Informe o nome do jogador: ");
+    scanf("%s", players->nome);
+    system("cls");
+    while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+    {
+        sscanf(linha, "%[^,],%d,%d", nome, &*cont_jogadas, &*victory);
+        if (strcmp(nome, players->nome) == 0)
         {
-           sscanf(linha, "%[^,],%d,%d",nome,&*cont_jogadas,&*victory);
-            if (strcmp(nome, players->nome) == 0)
-            {
-                verificar = 1;
-                fclose(arquivo_ranking);
-            }
+            verificar = 1;
+            fclose(arquivo_ranking);
         }
-    if(verificar == 0)
+    }
+    if (verificar == 0)
     {
         printf("Usuario não encontrado!\n");
         fclose(arquivo_ranking);
-        
     }
 }
 
@@ -254,6 +256,7 @@ void Lancar_Dado(Player *player, PC *computador, int *victory, int dev, int *jog
             printf("%s ganhou!\n", player->nome);
             Zerar_Dados(player, computador);
             (*victory)++;
+            Atualizar_Ranking(player, jogadas, victory);
         }
         else
         {
@@ -344,6 +347,7 @@ void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas, int *v
             printf("Player ganhou!\n");
             (*victory)++;
             Zerar_Dados(player, computador);
+            Atualizar_Ranking(player, cont_jogadas, victory);
         }
         else
         {
@@ -421,28 +425,28 @@ void Atualizar_Ranking(Player *player, int *cont_jogadas, int *victory)
 {
     FILE *arquivo_ranking_temp = fopen("./arquivo_ranking_temp.txt", "w+");
     FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "r");
-    
+
     char nome[50];
     int jogadas, vitorias;
     char linha[100];
-    
-    while(fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+
+    while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
     {
-       sscanf(linha, "%[^,],%d,%d", nome, &jogadas, &vitorias);
-      
-      if(strcmp(nome, player->nome) == 0)
-      {
-        fprintf(arquivo_ranking_temp, "%s,%d,%d\n", player->nome, *cont_jogadas, *victory);
-      }
-      else
-      {
-        fprintf(arquivo_ranking_temp, "%s,%d,%d\n", nome, jogadas, vitorias);
-      }
+        sscanf(linha, "%[^,],%d,%d", nome, &jogadas, &vitorias);
+
+        if (strcmp(nome, player->nome) == 0)
+        {
+            fprintf(arquivo_ranking_temp, "%s,%d,%d\n", player->nome, *cont_jogadas, *victory);
+        }
+        else
+        {
+            fprintf(arquivo_ranking_temp, "%s,%d,%d\n", nome, jogadas, vitorias);
+        }
     }
-    
+
     fclose(arquivo_ranking_temp);
     fclose(arquivo_ranking);
-    
+
     remove("./arquivo_ranking.txt");
     rename("./arquivo_ranking_temp.txt", "./arquivo_ranking.txt");
 }
@@ -476,21 +480,48 @@ int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores)
     return jogador_existente;
 }
 
-void Mostrar_Ranking()
+void Mostrar_Ranking(Player *player, int *victory, int *cont_jogadas)
 {
     FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "r");
+    char nome[50];
+    int jogadas, vitorias;
+    int menor_jogada = 0, maior_vitoria = 0;
+    char linha[100];
 
     if (arquivo_ranking != NULL)
     {
-        char conteudo[100];
-
-        while (fgets(conteudo, 100, arquivo_ranking) != NULL)
+        while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
         {
-            printf("%s", conteudo);
+            sscanf(linha, "%49[^,],%d,%d", nome, &jogadas, &vitorias);
+
+            if (menor_jogada < jogadas)
+            {
+                menor_jogada = jogadas;
+            }
+
+            if (maior_vitoria < vitorias)
+            {
+                maior_vitoria = vitorias;
+            }
+
+            printf("Nome do jogador: %s\n", nome);
+            printf("Quantidade de jogadas: %d\n", menor_jogada);
+            printf("Quantidade de vitórias: %d\n\n", maior_vitoria);
         }
 
-        getchar();
-        system("cls");
+        rewind(arquivo_ranking);
+
+        while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+        {
+            sscanf(linha, "%49[^,],%d,%d", nome, &jogadas, &vitorias);
+
+            if (jogadas == menor_jogada && vitorias == maior_vitoria)
+            {
+                printf("Nome do jogador: %s\n", nome);
+                printf("Quantidade de jogadas: %d\n", jogadas);
+                printf("Quantidade de vitórias: %d\n\n", vitorias);
+            }
+        }
     }
     else
     {
