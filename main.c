@@ -27,7 +27,7 @@ typedef struct
 
 void Menu_Login(int, Player *, int *, int *);
 void Cadastro(Player *, int *, int *);
-void Login(Player *, int *, int *);
+void Login(int, Player *, int *, int *);
 void Lancar_Dado(Player *, PC *, int *, int, int *);
 void Lancar_Dado_PC(PC *, Player *);
 void Segurar_Dado(Player *);
@@ -72,12 +72,12 @@ int main()
         else
         {
             printf("Rodada: Player %d - PC %d\n", player.Resultado_Def_Player, computador.Resultado_Def_PC);
-            printf("Vitórias: %d\n", vitoria);
+            printf("VitÃ³rias: %d\n", vitoria);
         }
 
         if (computador.Resultado_Def_PC < 100 && player.Resultado_Def_Player < 100)
         {
-            printf("1. Lançar o dado\n2. Segurar\n3. Alterar Dificuldade\n4. Mostrar Ranking\n5. Icarus Mode\n6. Encerrar o jogo\n");
+            printf("1. LanÃ§ar o dado\n2. Segurar\n3. Alterar Dificuldade\n4. Mostrar Ranking\n5. Icarus Mode\n6. Encerrar o jogo\n");
             scanf("%d", &opcao);
             getchar();
             system("cls");
@@ -113,7 +113,7 @@ int main()
             Mostrar_Ranking(&player, &vitoria, &cont_jogadas);
             break;
         case 5:
-            printf("Red Bull te dá asas!\n");
+            printf("Red Bull te dÃ¡ asas!\n");
             Dev = 1;
             break;
         case 6:
@@ -122,7 +122,7 @@ int main()
             break;
 
         default:
-            printf("Operação inválida!\n");
+            printf("OperaÃ§Ã£o invÃ¡lida!\n");
             break;
         }
     }
@@ -143,11 +143,11 @@ void Menu_Login(int opcao, Player *players, int *victory, int *cont_jogadas)
         Cadastro(players, victory, cont_jogadas);
         break;
     case 2:
-        Login(players, victory, cont_jogadas);
+        Login(opcao, players, victory, cont_jogadas);
         break;
 
     default:
-        printf("Opção inválida!\n");
+        printf("OpÃ§Ã£o invÃ¡lida!\n");
         break;
     }
 }
@@ -185,7 +185,7 @@ void Cadastro(Player *players, int *victory, int *cont_jogadas)
     }
 }
 
-void Login(Player *players, int *victory, int *cont_jogadas)
+void Login(int opcao, Player *players, int *victory, int *cont_jogadas)
 {
     FILE *arquivo_ranking = fopen("arquivo_ranking.txt", "r");
 
@@ -208,7 +208,8 @@ void Login(Player *players, int *victory, int *cont_jogadas)
     }
     if (verificar == 0)
     {
-        printf("Usuario não encontrado!\n");
+        printf("Usuario nÃ£o encontrado!\n");
+        Menu_Login(opcao, players, victory, cont_jogadas);
         fclose(arquivo_ranking);
     }
 }
@@ -226,7 +227,7 @@ void Lancar_Dado(Player *player, PC *computador, int *victory, int dev, int *jog
 
     if (player->Dado_Player == 1)
     {
-        printf("Você tirou 1! Perdeu os pontos da rodada.\n");
+        printf("VocÃª tirou 1! Perdeu os pontos da rodada.\n");
         player->Resultado_Player = 0;
         Lancar_Dado_PC(computador, player);
     }
@@ -236,12 +237,12 @@ void Lancar_Dado(Player *player, PC *computador, int *victory, int dev, int *jog
 
         if (player->Dado_Player > 6)
         {
-            printf("Você tirou 1! Perdeu os pontos da rodada.\n");
+            printf("VocÃª tirou 1! Perdeu os pontos da rodada.\n");
             player->Resultado_Player = 0;
             return;
         }
 
-        printf("Você tirou %d\n", player->Dado_Player);
+        printf("VocÃª tirou %d\n", player->Dado_Player);
         (*jogadas)++;
         Atualizar_Ranking(player, jogadas, victory);
 
@@ -323,7 +324,7 @@ void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas, int *v
 
     if (player->Dado_Player == 1 || player->Dado_Player_2 == 1)
     {
-        printf("Você tirou 1! Perdeu os pontos da rodada.\n");
+        printf("VocÃª tirou 1! Perdeu os pontos da rodada.\n");
         player->Resultado_Player = 0;
         Lancar_Dois_Dado_PC(computador, player);
     }
@@ -332,7 +333,7 @@ void Lancar_Dois_Dados(Player *player, PC *computador, int *cont_jogadas, int *v
         player->Resultado_Player += player->Dado_Player;
         player->Resultado_Player += player->Dado_Player_2;
 
-        printf("Você tirou %d e %d\n", player->Dado_Player, player->Dado_Player_2);
+        printf("VocÃª tirou %d e %d\n", player->Dado_Player, player->Dado_Player_2);
         (*cont_jogadas)++;
         Atualizar_Ranking(player, cont_jogadas, victory);
 
@@ -451,7 +452,7 @@ void Atualizar_Ranking(Player *player, int *cont_jogadas, int *victory)
     rename("./arquivo_ranking_temp.txt", "./arquivo_ranking.txt");
 }
 
-// erro na lógica da função
+// erro na lÃ³gica da funÃ§Ã£o
 
 int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores)
 {
@@ -473,63 +474,68 @@ int Jogador_Existente_Ranking(Player *player, int *victory, int *num_jogadores)
     }
     else
     {
-        printf("ERRO AO VERIFICAR EXISTÊNCIA DO JOGADOR!\n");
+        printf("ERRO AO VERIFICAR EXISTÃŠNCIA DO JOGADOR!\n");
     }
 
     fclose(arquivo_ranking);
     return jogador_existente;
 }
 
+typedef struct {
+char nome [50];
+int jogadas;
+int vitorias;
+}Lista_Jogadores;
+
 void Mostrar_Ranking(Player *player, int *victory, int *cont_jogadas)
 {
+  
     FILE *arquivo_ranking = fopen("./arquivo_ranking.txt", "r");
-    char nome[50];
-    int jogadas, vitorias;
-    int menor_jogada = 0, maior_vitoria = 0;
+    Lista_Jogadores lista[100];
+    int menor_jogada[100] = {0}, maior_vitoria[100] = {0};
     char linha[100];
+    int cont = 0;
 
     if (arquivo_ranking != NULL)
     {
-        while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+      
+      while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
         {
-            sscanf(linha, "%49[^,],%d,%d", nome, &jogadas, &vitorias);
-
-            if (menor_jogada < jogadas)
-            {
-                menor_jogada = jogadas;
-            }
-
-            if (maior_vitoria < vitorias)
-            {
-                maior_vitoria = vitorias;
-            }
-
-            printf("Nome do jogador: %s\n", nome);
-            printf("Quantidade de jogadas: %d\n", menor_jogada);
-            printf("Quantidade de vitórias: %d\n\n", maior_vitoria);
+            sscanf(linha, "%[^,],%d,%d", lista[cont].nome, &lista[cont].jogadas, &lista[cont].vitorias);
+            cont++;
         }
-
+        
+        cont = 0;
         rewind(arquivo_ranking);
-
         while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
         {
-            sscanf(linha, "%49[^,],%d,%d", nome, &jogadas, &vitorias);
-
-            if (jogadas == menor_jogada && vitorias == maior_vitoria)
+            if (menor_jogada[cont] < lista[cont].jogadas)
             {
-                printf("Nome do jogador: %s\n", nome);
-                printf("Quantidade de jogadas: %d\n", jogadas);
-                printf("Quantidade de vitórias: %d\n\n", vitorias);
+                menor_jogada[cont] = lista[cont].jogadas;
             }
+
+            if (maior_vitoria[cont] < lista[cont].vitorias)
+            {
+                maior_vitoria[cont] = lista[cont].vitorias;
+            }
+            cont++;
+        }
+        cont = 0;
+        rewind(arquivo_ranking);
+        while (fgets(linha, sizeof(linha), arquivo_ranking) != NULL)
+        {
+                printf("Nome do jogador: %s\n", lista[cont].nome);
+                printf("Quantidade de jogadas: %d\n", menor_jogada[cont]);
+                printf("Quantidade de vitÃ³rias: %d\n\n", maior_vitoria[cont]);
+                cont++;
         }
     }
-    else
-    {
-        printf("ERRO AO VISUALIZAR O ARQUIVO!\n");
-    }
-
-    fclose(arquivo_ranking);
+        fclose(arquivo_ranking);
 }
+    
+
+    
+
 
 void Zerar_Dados(Player *player, PC *computador)
 {
@@ -544,21 +550,21 @@ void Zerar_Dados(Player *player, PC *computador)
 void Dificuldade(int *dificuldade)
 {
 
-    printf("1. Fácil\n2. Difícil\n");
+    printf("1. FÃ¡cil\n2. DifÃ­cil\n");
     scanf("%d", &*dificuldade);
     system("cls");
 
     switch (*dificuldade)
     {
     case 1:
-        printf("Modo Fácil\n");
+        printf("Modo FÃ¡cil\n");
         break;
     case 2:
-        printf("Modo Difícil\n");
+        printf("Modo DifÃ­cil\n");
         break;
 
     default:
-        printf("Opção inválida");
+        printf("OpÃ§Ã£o invÃ¡lida");
         break;
     }
 }
